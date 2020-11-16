@@ -3,7 +3,7 @@
 
 
 using namespace std;
-using namespace nokialog;
+using namespace Std;
 
 
 
@@ -13,37 +13,28 @@ int sum(int a, int b){
 }
 
 int main(){
-    int num = 100; 
-    int num1 = 200;
     int s;
     //instanciate your objects HERE
-    Logger& logger = Logger::NEW();
+    logger& logger1 = logger::NEW();
 
     //Configure your settings HERE
-    logger.config(Logger::logOUT::console, Logger::logLevels::DEBUG,Logger::format::ID);
+    logger1.config(logger::outputMode::both, logger::logLevels::INFO,logger::outputFormat::ID);
     
+
+    std::cout << "Followings are all the log enteries that a user made." << std::endl;
     //TEST .log() with different data types
-    logger.log(s = sum(num, num1), Logger::logLevels::INFO);
-    logger.log(12.23, Logger::logLevels::INFO);
-    logger.log('R', Logger::logLevels::DEBUG);
-    logger.log("msg", Logger::logLevels::ERROR);
-    logger.log(10, Logger::logLevels::WARNING);
-    logger.log(10, Logger::logLevels::DEBUG);
-    logger.log(10, Logger::logLevels::ERROR);
-    logger.log(10, Logger::logLevels::ERROR);
-    logger.log(10, Logger::logLevels::ERROR);
-    logger.log(10, Logger::logLevels::ERROR);
-
-
-    cout << "BEFOR: " << endl;
+    logger1.log(to_string(s = sum(INT32_MAX, INT32_MAX)) + " The result of the sum function doesn't work for INT_MAX", logger::logLevels::ERROR);
+    logger1.log(12.23, logger::logLevels::ERROR);
+    logger1.log('R', logger::logLevels::DEBUG);
+    logger1.log("msg", logger::logLevels::DEBUG);
+    logger1.log(10, logger::logLevels::WARNING);
+    logger1.log(10, logger::logLevels::DEBUG);
+    logger1.log(10, logger::logLevels::DEBUG);
+    logger1.log(10, logger::logLevels::INFO);
+    logger1.log(10, logger::logLevels::ERROR);
+    logger1.log(10, logger::logLevels::ERROR);
 
     //TEST .getErrors()
-    logger.getErrors();
-
-
-    //TEST .clear(unique ID)
-    logger.clear(-1);
-
-    cout << "AFTER" << endl << endl << endl << endl;
-    logger.getErrors();
+    std::cout << "Followings are all the active errors in the current thread." << std::endl;
+    logger1.getErrors();
 }

@@ -2,11 +2,7 @@
  *  @uthor: Hussain Izhar  
  *  Purpose: NOKIA TASK
  */
-
-
-
-
-#pragma once //only compilation
+#pragma once
 
 #include <iostream>
 #include <string> 
@@ -17,127 +13,123 @@
 #include <ctime> 
 #include <thread>
 
-using namespace std;
 
-namespace nokialog
+using namespace std; //standard
+
+namespace Std //my standard
 {
 
-class Logger{
+	
+
+class logger{
 public: 
 
+/////////////////////////////////////////////////////////////////////////////
+//Log Levels, Log output mode, and Log Format
+////////////////////////////////
     enum class logLevels{
         DEBUG, INFO, WARNING, ERROR,
     };
 
-    enum class logOUT{
+    enum class outputMode{
         file,console,both,
     };
-
-    enum class format{
+	
+    enum class outputFormat{
         DEFAULT,DATE_TIME,ID,
     };
 
     string TO_STRING(const logLevels ilevel){
-        string result = "NONE";
+        string result = "NONE"; 
         const static map<logLevels, string> logLevelStrings{
             {logLevels::DEBUG, "DEBUG"},
             {logLevels::INFO, "INFO" },
             {logLevels::ERROR, "ERROR"},
             {logLevels::WARNING, "WARNING" },
         };
-
-        auto itr = logLevelStrings.find(ilevel); //find the input string in the map
+        auto itr = logLevelStrings.find(ilevel); 
         if(itr != logLevelStrings.end()){
-            result = itr->second; //will return the second (string part) of the map
+            result = itr->second;
         } 
         return result;  
     }
-    ~Logger(){}
+    ~logger(){} 
 
 
-    /*
-    * Configurations: 
-    * 1-> User can change four levels log levels, namely DEBUG INFO WARNING ERROR  
-    * 2-> User can set the ouput into a console winodow as well as file, and both
-    * 3-> User can set the output format from a very simple one to a more fancy one
-    * 
-    * DEFAULT VALUES: 
-    * levels: WARNING 
-    * format: DEFAULT -> which means the simplest output formate
-    * ouput mode: both console and file
-    */
 
-    void config(format iformat){
-        if(iformat == format::DATE_TIME){
-            outFormate = format::DATE_TIME;
+/////////////////////////////////////////////////////////////////////////////
+//Configurations
+////////////////////////////////
+    void config(const outputFormat iformat){
+        if(iformat == outputFormat::DATE_TIME){
+            format = outputFormat::DATE_TIME;
         }
-        if(iformat == format::ID){
-            outFormate = format::ID;
+        if(iformat == outputFormat::ID){
+            format = outputFormat::ID;
         }
-        if(iformat == format::DEFAULT){
-            outFormate = format::DEFAULT;
+        if(iformat == outputFormat::DEFAULT){
+            format = outputFormat::DEFAULT;
         }
     }
     
-    void config(logOUT iout){
-        if(iout == logOUT::console){
-            outPlatform = logOUT::console;
+    void config(const outputMode iout){
+        if(iout == outputMode::console){
+            mode = outputMode::console;
         }
-        if(iout == logOUT::file){
-            outPlatform = logOUT::file;
+        if(iout == outputMode::file){
+            mode = outputMode::file;
         }
-        if(iout == logOUT::both){
-            outPlatform = logOUT::both;
+        if(iout == outputMode::both){
+            mode = outputMode::both;
         }
     }
-    void config(logLevels ilevel){
-        userChoiceLogLevel = ilevel;
+    void config(const logLevels ilevel){
+        userLogLevel = ilevel;
     }
-    void config(logOUT iout, logLevels ilevel){
+    void config(const outputMode iout, const logLevels ilevel){
         config(iout);
         config(ilevel);
     }
-    void config(logOUT iout, format iform){
+    void config(const outputMode iout, const outputFormat iform){
         config(iout);
         config(iform);
     }
-    void config(logLevels ilevel, format iform){
+    void config(const logLevels ilevel,const outputFormat iform){
         config(ilevel);
         config(iform);
     }
-    void config(logOUT iout,logLevels ilevel, format iform){
+    void config(const outputMode iout, const logLevels ilevel,const outputFormat iform){
         config(iout);
         config(ilevel);
         config(iform);
     }
 
-    /**
-     * Our constructor is private, instead we created a method which is looks more like C++ syntax of "new"
-     **/
-    static Logger& NEW(){
-        static Logger newlog; 
+
+
+/////////////////////////////////////////////////////////////////////////////
+//Constructor Replacement Function
+////////////////////////////////    
+    static logger& NEW(){
+        static logger newlog; 
         return newlog;
     }
-
-    /**
-     * void log() function
-     * ->creates a log into a file and into a console depending on the config settings 
-     */
+	
     void openFile(){
-        if (outFile.is_open()) {
+        if (file.is_open()) {
             return;
         }
-        outFile.open(outFileName, ios_base::app | ios::out);
-        IS_OPEN = outFile.is_open();
-        if (!IS_OPEN){
-            throw std::runtime_error("Couldn't open the log file " + outFileName + ".");
+        file.open(filename, ios_base::app | ios::out);
+        isOpen = file.is_open();
+        if (!isOpen){
+            throw std::runtime_error("Couldn't open the log file " + filename + ".");
         }
     }
     void closeFile(){
-        if(outFile.is_open()){
-            outFile.close();
+        if(file.is_open()){
+            file.close();
         }
     }    
+    
     string wrap(string s){
         string prefix = "[";
         string suffix = "] ";
@@ -146,45 +138,41 @@ public:
 
     string outputFormating(const string message,logLevels ilevel){
         string OUTPUT;
-        if(outFormate == format::ID){
-            OUTPUT = wrap(threadID()) +   wrap(CURRENT_TIME())  + wrap(message) + wrap(TO_STRING(ilevel)) + "\n";
+        if(format == outputFormat::ID){
+            OUTPUT = wrap(threadID()) +   wrap(Time())  + wrap(message) + wrap(TO_STRING(ilevel)) + "\n";
         }
-        if(outFormate == format::DATE_TIME){
-            OUTPUT = wrap(CURRENT_TIME())  + wrap(message) + wrap(TO_STRING(ilevel)) + "\n";
+        if(format == outputFormat::DATE_TIME){
+            OUTPUT = wrap(Time())  + wrap(message) + wrap(TO_STRING(ilevel)) + "\n";
         }
-        if(outFormate == format::DEFAULT){
+        if(format == outputFormat::DEFAULT){
             OUTPUT =  wrap(message)  + wrap(TO_STRING(ilevel)) + "\n";
         } 
         return OUTPUT;
     }
 
     void log(const string& message, logLevels ilevel){
-        if(userChoiceLogLevel > ilevel){
+        if(userLogLevel > ilevel){
             return; 
         }
         string endl = "\n",OUTPUT;
         OUTPUT = outputFormating(message, ilevel); 
         if(ilevel == logLevels::ERROR){
-            errors.push_back(make_pair(ui++, OUTPUT));
+            errors.push_back(make_pair(uId++, OUTPUT));
         }
-        if(outPlatform == logOUT::console){
+        if(mode == outputMode::console){
             cout << OUTPUT;
-        }else if(outPlatform == logOUT::file){
+        }else if(mode == outputMode::file){
             openFile();
-            outFile << OUTPUT;
+            file << OUTPUT;
             closeFile();
         }else{
             cout << OUTPUT;
             openFile();
-            outFile << OUTPUT;
+            file << OUTPUT;
             closeFile();
         }
     }
 
-
-    /**
-     *  Template funtion of the log() function: generic inputs
-     */
     template<class T>
     void log(const T& t, const logLevels llevels){
         string data;
@@ -194,59 +182,45 @@ public:
         log(data, llevels); 
     }
 
-    /**
-     * getErrors() prints out current running errors on to the console
-     **/
+
+/////////////////////////////////////////////////////////////////////////////
+//Get All the Errors in the current thread
+////////////////////////////////  
     void getErrors(){
         for(auto it = 0;  it < errors.size(); it++){
             cout <<errors.at(it).second ;//<< endl;
         }
     }
 
-    /*
-     * clear() deletes an error thread at any specified id in the log thread | linear search
-     **/
-
-    void clear(int id){
-        for(int it = 0;  it < errors.size(); it++){
-            if(id == errors.at(it).first){
-                errors.erase(errors.begin()+it);
-            }
-        }
-    }
 
 
 private:
-    logOUT outPlatform = logOUT::both;//ouput mode 
-    format outFormate = format::DEFAULT; //ouput Format
-    logLevels userChoiceLogLevel = logLevels::WARNING; //log levels
-    string outFileName = "log.txt"; //active file name
-    fstream outFile; //fstream fileObject
-    bool IS_OPEN = false; //file check 
-    vector<pair<int, string>> errors; //ERORRS container 
-    int ui = -1; //unique IDiterator of the ERORRS container
-    /*
-    /*current date and time as string
-     */
-    static string CURRENT_TIME(){ 
+    outputMode mode = outputMode::both;
+    outputFormat format = outputFormat::DEFAULT; 
+    logLevels userLogLevel = logLevels::WARNING; 
+    string filename = "log.txt"; 
+    fstream file; 
+    bool isOpen = false;  
+    vector<pair<int, string>> errors; 
+    int uId = -1; //unique ID .. You can search for a specific error in the veroct errors
+    static string Time(){ 
         time_t now = time(0);
         struct tm tstruct;
         char buf[80];
-        tstruct = *localtime(&now);
+        tstruct = *localtime(&now); 
         strftime(buf, sizeof(buf), "%Y-%m-%d %X", &tstruct);
         return buf; 
     }
-    /*
-    *Curret thread ID 
-    */
-    static string threadID(){ // returns the id of the current log as a string 
+
+    //current threads ID
+    static string threadID(){ 
         stringstream ss; 
         ss << this_thread::get_id();
         return ss.str();
     }
-    Logger(){} 
+    logger(){} 
 
-}; //end class Logger
+}; //end class logger
 
 
-} //end namespace nokialog
+} //end namespace Std;
