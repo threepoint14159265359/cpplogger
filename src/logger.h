@@ -113,6 +113,11 @@ public:
         static logger newlog; 
         return newlog;
     }
+
+
+/////////////////////////////////////////////////////////////////////////////
+//Following functions are only to be used in the log() function
+////////////////////////////////
 	
     void openFile(){
         if (file.is_open()) {
